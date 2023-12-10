@@ -3,7 +3,7 @@ const http = require("http");
 const socketIO = require("socket.io");
 const path = require("path");
 const { Sequelize, DataTypes } = require("sequelize");
-require('dotenv/config')
+require("dotenv/config");
 // Crear la aplicación Express
 const app = express();
 const server = http.createServer(app);
@@ -13,38 +13,42 @@ app.use(express.json());
 
 // Configuración de la conexión a la base de datos
 const sequelize = new Sequelize(
-  process.env.MYSQL_DATABASE ?? 'chat',
-  process.env.MYSQL_USERNAME ?? 'root',
-  process.env.MYSQL_PASSWORD ,
+  process.env.MYSQL_DATABASE ?? "chat",
+  process.env.MYSQL_USERNAME ?? "root",
+  process.env.MYSQL_PASSWORD,
   {
-  host: "localhost",
-  dialect: "mysql", // Cambiar al dialecto correspondiente a tu base de datos (mysql, postgres, sqlite, etc.)
-});
+    host: "localhost",
+    dialect: "mysql", // Cambiar al dialecto correspondiente a tu base de datos (mysql, postgres, sqlite, etc.)
+  }
+);
 
 // Definición del modelo de Usuario
-const Usuario = sequelize.define("Usuario", {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
+const Usuario = sequelize.define(
+  "Usuario",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    nombre: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  nombre: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  username: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  
-},{
-  timestamps: false,
-});
+  {
+    timestamps: false,
+  }
+);
 
 // Definición del modelo de Mensaje
 const Mensaje = sequelize.define("Mensaje", {
@@ -168,7 +172,7 @@ app.get("/messages", async (req, res) => {
 
 // Sincronizar las tablas con la base de datos
 sequelize
-  .sync({alter: true})
+  .sync({ alter: true })
   .then(() => {
     console.log("Tablas sincronizadas correctamente");
   })

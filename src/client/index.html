@@ -83,7 +83,7 @@
         .then((messages) => {
           messages.forEach((message) => {
             const newMessage = {
-              sender: message.Usuario.nombre,
+              sender: message.Usuario.username,
               message: message.contenido,
               timestamp: message.fechaEnvio,
             };
