@@ -12,14 +12,27 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css"
       rel="stylesheet"
     />
+    <style>
+      .chat-messages {
+        max-height: 300px; /* Ajusta la altura máxima según tus necesidades */
+        overflow-y: auto;
+      }
+    </style>
   </head>
-  <body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-      <h1 class="text-2xl font-bold mb-4">Chat con WebSockets</h1>
+  <body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div
+      class="container mx-auto px-4 py-8 rounded-lg overflow-hidden border border-gray-300"
+    >
+      <div class="flex items-center justify-center">
+        <h1 class="text-2xl font-bold mb-4">Chat con WebSockets</h1>
+      </div>
 
-      <div id="chat-messages" class="mb-4"></div>
+      <div id="chat-messages" class="mb-4 chat-messages"></div>
 
-      <form id="chat-form" class="flex items-center">
+      <form
+        id="chat-form"
+        class="flex items-center bg-white rounded-lg overflow-hidden border border-gray-300 px-4 py-2 shadow-sm mb-4"
+      >
         <input
           id="message-input"
           type="text"
@@ -34,9 +47,26 @@
           <i class="fas fa-paper-plane"></i>
         </button>
       </form>
+
+      <button
+        id="logout-button"
+        class="bg-red-500 hover:bg-red-600 text-white rounded py-2 px-4 focus:outline-none absolute top-4 left-4"
+      >
+        Cerrar sesión
+      </button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+
+    <script>
+      // Obtener el nombre de usuario del localStorage
+      const username = localStorage.getItem("username");
+
+      if (!username) {
+        window.location.href = "/login";
+      }
+    </script>
+
     <script>
       // Conexión WebSocket
       const socket = io("http://localhost:3000");
@@ -45,9 +75,7 @@
       const chatMessages = document.getElementById("chat-messages");
       const chatForm = document.getElementById("chat-form");
       const messageInput = document.getElementById("message-input");
-
-      // Obtener el nombre de usuario del localStorage
-      const username = localStorage.getItem("username");
+      const logoutButton = document.getElementById("logout-button");
 
       // Cargar los mensajes al cargar la página
       fetch("/messages")
@@ -99,15 +127,16 @@
           "justify-between"
         );
         messageElement.innerHTML = `
-                <div>
-                    <p class="font-bold">${message.sender}</p>
-                    <p>${message.message}</p>
-                </div>
-                <p class="text-gray-500">${formatTimestamp(
-                  message.timestamp
-                )}</p>
-            `;
+          <div>
+            <p class="font-bold">${message.sender}</p>
+            <p>${message.message}</p>
+          </div>
+          <p class="text-gray-500">${formatTimestamp(message.timestamp)}</p>
+        `;
         chatMessages.appendChild(messageElement);
+
+        // Hacer que el scroll baje automáticamente
+        chatMessages.scrollTop = chatMessages.scrollHeight;
       }
 
       // Formatear la marca de tiempo del mensaje
@@ -115,6 +144,12 @@
         const options = { hour: "2-digit", minute: "2-digit" };
         return new Date(timestamp).toLocaleTimeString("es-ES", options);
       }
+
+      // Cerrar sesión
+      logoutButton.addEventListener("click", function () {
+        localStorage.removeItem("username");
+        window.location.href = "/login"; // Redirigir a la página de inicio de sesión
+      });
     </script>
   </body>
 </html>
