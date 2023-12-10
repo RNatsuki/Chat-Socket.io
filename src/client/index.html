@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat con WebSockets</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+      <h1 class="text-2xl font-bold mb-4">Chat con WebSockets</h1>
+
+      <div id="chat-messages" class="mb-4"></div>
+
+      <form id="chat-form" class="flex items-center">
+        <input
+          id="message-input"
+          type="text"
+          class="flex-grow border border-gray-300 rounded-l py-2 px-4 focus:outline-none focus:border-blue-500"
+          placeholder="Escribe un mensaje..."
+        />
+        <button
+          id="send-button"
+          type="submit"
+          class="bg-blue-500 hover:bg-blue-600 text-white rounded-r py-2 px-4 focus:outline-none"
+        >
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+    <script>
+      // Conexión WebSocket
+      const socket = io("http://localhost:3000");
+
+      // Elementos del chat
+      const chatMessages = document.getElementById("chat-messages");
+      const chatForm = document.getElementById("chat-form");
+      const messageInput = document.getElementById("message-input");
+
+      // Obtener el nombre de usuario del localStorage
+      const username = localStorage.getItem("username");
+
+      // Cargar los mensajes al cargar la página
+      fetch("/messages")
+        .then((response) => response.json())
+        .then((messages) => {
+          messages.forEach((message) => {
+            const newMessage = {
+              sender: message.Usuario.nombre,
+              message: message.contenido,
+              timestamp: message.fechaEnvio,
+            };
+            displayMessage(newMessage);
+          });
+        })
+        .catch((error) => {
+          console.error("Error al cargar los mensajes:", error);
+        });
+
+      // Escuchar mensajes entrantes
+      socket.on("message", function (message) {
+        displayMessage(message);
+      });
+
+      // Enviar mensaje al servidor
+      chatForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const message = messageInput.value;
+        if (message.trim() !== "") {
+          const newMessage = {
+            sender: username,
+            message: message,
+            timestamp: new Date(),
+          };
+          socket.emit("message", newMessage);
+          //displayMessage(newMessage);
+          messageInput.value = "";
+        }
+      });
+
+      // Mostrar mensaje en la interfaz
+      function displayMessage(message) {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add(
+          "bg-white",
+          "rounded-lg",
+          "p-4",
+          "mb-2",
+          "flex",
+          "justify-between"
+        );
+        messageElement.innerHTML = `
+                <div>
+                    <p class="font-bold">${message.sender}</p>
+                    <p>${message.message}</p>
+                </div>
+                <p class="text-gray-500">${formatTimestamp(
+                  message.timestamp
+                )}</p>
+            `;
+        chatMessages.appendChild(messageElement);
+      }
+
+      // Formatear la marca de tiempo del mensaje
+      function formatTimestamp(timestamp) {
+        const options = { hour: "2-digit", minute: "2-digit" };
+        return new Date(timestamp).toLocaleTimeString("es-ES", options);
+      }
+    </script>
+  </body>
+</html>
