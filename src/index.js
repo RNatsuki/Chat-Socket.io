@@ -4,6 +4,7 @@ const socketIO = require("socket.io");
 const path = require("path");
 const { Sequelize, DataTypes } = require("sequelize");
 require("dotenv/config");
+
 // Crear la aplicación Express
 const app = express();
 const server = http.createServer(app);
@@ -19,6 +20,7 @@ const sequelize = new Sequelize(
   {
     host: "localhost",
     dialect: "mysql", // Cambiar al dialecto correspondiente a tu base de datos (mysql, postgres, sqlite, etc.)
+    logging: false, // Desactivar logs
   }
 );
 
@@ -111,12 +113,12 @@ io.on("connection", (socket) => {
   });
 });
 
-//Ruta para enviar el archivo login.html que contiene el login
-
+// Ruta para enviar el archivo login.html que contiene el login
 app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "client", "login.html"));
 });
 
+// Ruta para manejar la autenticación del usuario
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -167,8 +169,6 @@ app.get("/messages", async (req, res) => {
     res.status(500).json({ error: "Error al obtener los mensajes" });
   }
 });
-
-// ...
 
 // Sincronizar las tablas con la base de datos
 sequelize
