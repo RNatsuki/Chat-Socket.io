@@ -23,6 +23,7 @@
     <div
       class="container mx-auto px-4 py-8 rounded-lg overflow-hidden border border-gray-300"
     >
+    <p class="text-gray-500 text-sm">Estás conectado como: <div id="username"></div></p>
       <div class="flex items-center justify-center">
         <h1 class="text-2xl font-bold mb-4">Chat con WebSockets</h1>
       </div>
@@ -65,6 +66,9 @@
       if (!username) {
         window.location.href = "/login";
       }
+
+      document.getElementById("username").innerText = username;
+      console.log(document.getElementById("username"));
     </script>
 
     <script>
@@ -87,6 +91,11 @@
               message: message.contenido,
               timestamp: message.fechaEnvio,
             };
+
+            if (message.Usuario.username === username) {
+              newMessage.sender = "Tú";
+            }
+
             displayMessage(newMessage);
           });
         })
@@ -128,7 +137,12 @@
         );
         messageElement.innerHTML = `
           <div>
-            <p class="font-bold">${message.sender}</p>
+            <p class="font-bold">${
+             message.sender === localStorage.getItem("username")
+                ? "Tú"
+                : message.sender
+
+            }</p>
             <p>${message.message}</p>
           </div>
           <p class="text-gray-500">${formatTimestamp(message.timestamp)}</p>
